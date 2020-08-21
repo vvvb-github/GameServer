@@ -2,10 +2,7 @@ package com.vvvb.game.websocket.controller;
 
 import com.vvvb.game.websocket.server.WebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "*", allowCredentials = "true")
@@ -23,6 +20,11 @@ public class WebSocketController {
             id = 1000;
         }
         return id.toString();
+    }
+
+    @RequestMapping(value = "/joinroom", method = RequestMethod.GET)
+    public Boolean joinRoom(String rid) {
+        return webSocketServer.countSession(rid).equals(1);
     }
 
 }

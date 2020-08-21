@@ -59,6 +59,10 @@ public class WebSocketServer {
 
     @OnClose
     public void onClose(Session session, @PathParam(value = "rid") String rid) {
+        if(!sessionPool.containsKey(rid)) {
+            return;
+        }
+
         ArrayList<Session> sessionList = sessionPool.get(rid);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", 0);
@@ -87,6 +91,25 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, @PathParam(value = "rid") String rid) {
         System.out.println(message);
+
+        JSONObject data = JSONObject.fromObject(message);
+        int id = data.getInt("id");
+
+        switch (id) {
+            case 1:
+                JSONObject res = new JSONObject();
+                res.put("id", 1);
+                broadcastMessage(rid, res.toString());
+                break;
+        }
+    }
+
+    public Integer countSession(String rid) {
+        if(sessionPool.containsKey(rid)) {
+            return sessionPool.get(rid).size();
+        }else{
+            return 0;
+        }
     }
 
 }
