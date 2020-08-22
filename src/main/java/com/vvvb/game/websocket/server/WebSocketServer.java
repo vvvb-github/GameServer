@@ -19,6 +19,9 @@ public class WebSocketServer {
 
     private static ConcurrentHashMap<String, ArrayList<Session> > sessionPool = new ConcurrentHashMap<>();
 
+    private static ConcurrentHashMap<String, Integer> readyCount = new ConcurrentHashMap<>();
+
+
     public void addConnect() {
         connections.incrementAndGet();
     }
@@ -94,13 +97,44 @@ public class WebSocketServer {
 
         JSONObject data = JSONObject.fromObject(message);
         int id = data.getInt("id");
+        JSONObject res = new JSONObject();
 
-        switch (id) {
-            case 1:
-                JSONObject res = new JSONObject();
-                res.put("id", 1);
-                broadcastMessage(rid, res.toString());
-                break;
+        try {
+            switch (id) {
+                case 1:
+                    res.put("id", 1);
+                    double identity = Math.random();
+                    if (identity < 0.5) {
+                        res.put("identity", 0);
+                        sendMessage(sessionPool.get(rid).get(0), res.toString());
+                        res.put("identity", 1);
+                    } else {
+                        res.put("identity", 1);
+                        sendMessage(sessionPool.get(rid).get(0), res.toString());
+                        res.put("identity", 0);
+                    }
+                    sendMessage(sessionPool.get(rid).get(1), res.toString());
+                    break;
+                case 2:
+                    res.put("id", 2);
+                    res.put("x", data.getInt("x"));
+                    res.put("y", data.getInt("y"));
+                    broadcastMessage(rid, res.toString());
+                    break;
+                case 3:
+                    broadcastMessage(rid, message);
+                    break;
+                case 4:
+                    if(readyCount.containsKey(rid)) {
+                        readyCount.remove(rid);
+                        broadcastMessage(rid, message);
+                    } else {
+                        readyCount.put(rid, 1);
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
